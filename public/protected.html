@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+   <head>
+      <meta charset="UTF-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Protected</title>
+   </head>
+   <body>
+      <h1>Ruta protegida</h1>
+
+      <h2>Email: <span id="app"></span></h2>
+      <button id="logout">Cerrar sesión</button>
+
+      <script>
+         const $logout = document.getElementById('logout');
+         $logout.addEventListener('click', async () => {
+            try {
+               const res = await fetch('/api/v1/auth/logout', { method: 'GET' });
+               console.log(res);
+            } catch (err) {
+               console.log(err);
+            }
+         });
+
+         document.addEventListener('DOMContentLoaded', async (e) => {
+            try {
+               const resToken = await fetch('/api/v1/auth/refresh', {
+                  method: 'GET',
+                  credentials: 'include',
+               });
+
+               const { token } = await resToken.json();
+
+               const res = await fetch('/api/v1/auth/protected', {
+                  method: 'GET',
+                  headers: {
+                     Authorization: `Bearer ${token}`,
+                     'Content-type': 'application/json',
+                  },
+               });
+               //console.log(res.ok, res.status);
+
+               const data = await res.json();
+               console.log(data);
+
+               if (res.ok) document.getElementById('app').innerText = data.email;
+            } catch (err) {
+               console.log(err);
+            }
+         });
+      </script>
+   </body>
+</html>
